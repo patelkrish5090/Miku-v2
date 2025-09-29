@@ -36,15 +36,11 @@ const SAMPLE_MARKDOWN_MESSAGE = [
   '```',
   '',
   '> Reminder: rerun Lighthouse after each optimization pass.',
-  '',
-  '[View QA playbook](https://example.com/qa-playbook)',
 ].join('\n')
 
 const resolveDefaultUrl = () => {
-  if (typeof window === 'undefined') {
-    return 'https://example.com'
-  }
-  return `${window.location.origin}/preview-demo.html`
+  if (typeof window === 'undefined') return ''
+    return ''
 }
 
 const clampChatWidth = (value: number) =>
@@ -414,7 +410,7 @@ function App() {
           style={{ flexBasis: `${previewWidthPercent}%`, maxWidth: `${previewWidthPercent}%`, flexGrow: 0 }}
         />
         <div
-          className="app-layout__divider"
+          className="panel-divider"
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize panels"

@@ -28,9 +28,6 @@ export const ChatPanel: FC<ChatPanelProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const endRef = useRef<HTMLDivElement | null>(null)
 
-  const MAX_INPUT_HEIGHT = 180
-  const MIN_INPUT_HEIGHT = 48
-
   const formatTimestamp = (isoString: string) => {
     const date = new Date(isoString)
     if (Number.isNaN(date.getTime())) return ''
@@ -48,12 +45,9 @@ export const ChatPanel: FC<ChatPanelProps> = ({
     const textarea = textareaRef.current
     if (!textarea) return
 
-    textarea.style.height = `${MIN_INPUT_HEIGHT}px`
     textarea.style.height = 'auto'
-
-    const nextHeight = Math.min(Math.max(textarea.scrollHeight, MIN_INPUT_HEIGHT), MAX_INPUT_HEIGHT)
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, 48), 120)
     textarea.style.height = `${nextHeight}px`
-    textarea.style.overflowY = textarea.scrollHeight > MAX_INPUT_HEIGHT ? 'auto' : 'hidden'
   }, [inputValue])
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
@@ -75,24 +69,26 @@ export const ChatPanel: FC<ChatPanelProps> = ({
   }
 
   return (
-  <section className="chat-panel" aria-label="Assistant chat" style={style}>
-      <div className="chat-panel__top">
-        <h2 className="chat-panel__title">Chat</h2>
-        <button type="button" className="chat-panel__clear" onClick={onClearHistory}>
-          Clear Chat
+    <section className="chat-panel" aria-label="Assistant chat" style={style}>
+      <div className="chat-header">
+        <h2 className="chat-title">Chat Assistant</h2>
+        <button type="button" className="btn btn-danger-outline" onClick={onClearHistory}>
+          Clear History
         </button>
       </div>
 
-      <div className="chat-panel__history" role="log" aria-live="polite">
+      <div className="chat-messages" role="log" aria-live="polite">
         {messages.map((message) => (
-          <article key={message.id} className={`chat-message chat-message--${message.role}`}>
-            <header className="chat-message__meta">
-              <span className="chat-message__author">{message.role === 'user' ? 'You' : 'Assistant'}</span>
-              <time className="chat-message__timestamp" dateTime={message.timestamp}>
+          <article key={message.id} className="chat-message">
+            <div className="chat-message-meta">
+              <span className="chat-message-author">
+                {message.role === 'user' ? 'You' : 'Assistant'}
+              </span>
+              <time className="chat-message-time" dateTime={message.timestamp}>
                 {formatTimestamp(message.timestamp)}
               </time>
-            </header>
-            <div className="chat-message__content">
+            </div>
+            <div className="chat-message-content">
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={markdownComponents}>
                 {message.content}
               </ReactMarkdown>
@@ -101,30 +97,28 @@ export const ChatPanel: FC<ChatPanelProps> = ({
         ))}
 
         {isTyping && (
-          <article className="chat-message chat-message--assistant chat-message--typing">
-            <header className="chat-message__meta">
-              <span className="chat-message__author">Assistant</span>
-              <span className="chat-message__timestamp">typing…</span>
-            </header>
-            <div className="typing-indicator" aria-label="Assistant is typing">
-              <span></span>
-              <span></span>
-              <span></span>
+          <article className="chat-message">
+            <div className="chat-message-meta">
+              <span className="chat-message-author">Assistant</span>
+              <span className="chat-message-time">typing…</span>
+            </div>
+            <div className="chat-message-content">
+              <div className="loading-spinner" style={{width: '20px', height: '20px'}}></div>
             </div>
           </article>
         )}
         <div ref={endRef} aria-hidden="true" />
       </div>
 
-      <form className="chat-panel__composer" onSubmit={handleSubmit}>
+      <form className="chat-composer" onSubmit={handleSubmit}>
         <label htmlFor="chat-input" className="sr-only">
           Send a message to the assistant
         </label>
         <textarea
           id="chat-input"
           ref={textareaRef}
-          className="chat-panel__input"
-          placeholder="Share a goal or ask for specific feedback…"
+          className="chat-input"
+          placeholder="Type here..."
           value={inputValue}
           onChange={(event) => onInputChange(event.target.value)}
           onKeyDown={handleKeyDown}
@@ -132,7 +126,7 @@ export const ChatPanel: FC<ChatPanelProps> = ({
           spellCheck
           aria-label="Chat input"
         />
-        <button type="submit" className="chat-panel__send" disabled={!inputValue.trim()}>
+        <button type="submit" className="btn btn-primary" disabled={!inputValue.trim()}>
           Send
         </button>
       </form>
